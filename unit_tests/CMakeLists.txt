@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.13.0)
 
-set(ML_UNIT_TESTS ml_unit_tests)
+set(SCIPY_UNIT_TESTS scipy_unit_tests)
 
-project(${ML_UNIT_TESTS} VERSION 0.0.1 DESCRIPTION "ML Unit Tests")
+project(${SCIPY_UNIT_TESTS} VERSION 0.0.1 DESCRIPTION "SciPy Unit Tests")
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -33,20 +33,20 @@ FetchContent_MakeAvailable(googletest)
 
 include_directories(../include include ${googletest_SOURCE_DIR}/googletest/include)
 
-add_executable(${ML_UNIT_TESTS})
+add_executable(${SCIPY_UNIT_TESTS})
 
 file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR} "src/*.cpp")
-target_sources(${ML_UNIT_TESTS} PUBLIC ${SOURCES})
+target_sources(${SCIPY_UNIT_TESTS} PUBLIC ${SOURCES})
 
-add_test(NAME ${ML_UNIT_TESTS} COMMAND tests)
+add_test(NAME ${SCIPY_UNIT_TESTS} COMMAND tests)
 
 target_link_libraries(
-    ${ML_UNIT_TESTS}
+    ${SCIPY_UNIT_TESTS}
     gtest
     ${PTHREAD})
 
 install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/${ML_UNIT_TESTS}
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/${SCIPY_UNIT_TESTS}
     DESTINATION ${CMAKE_INSTALL_BINDIR}
-    COMPONENT ${ML_UNIT_TESTS}
+    COMPONENT ${SCIPY_UNIT_TESTS}
 )

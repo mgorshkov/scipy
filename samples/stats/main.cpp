@@ -21,8 +21,8 @@ SOFTWARE.
 
 #include <iostream>
 
-#include "np/Creators.hpp"
-#include "scipy/stats/mode.hpp"
+#include <np/Creators.hpp>
+#include <scipy/stats/mode.hpp>
 
 int main(int, char **) {
     using namespace np;
