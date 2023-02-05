@@ -1,6 +1,9 @@
 # About
 Scientific methods on top of NP library.
 
+# Latest artifact
+https://mgorshkov.jfrog.io/artifactory/default-generic-local/scipy/scipy-0.0.1.tgz
+
 # Requirements
 Any C++17-compatible compiler:
 * gcc 8 or higher
@@ -13,10 +16,17 @@ git clone https://github.com/mgorshkov/scipy.git
 ```
 
 # Build unit tests and sample
+## Linux/MacOS
 ```
 mkdir build && cd build
 cmake ..
 cmake --build .
+```
+## Windows
+```
+mkdir build && cd build
+cmake ..
+cmake --build . --config Release
 ```
 
 # Build docs
@@ -70,11 +80,20 @@ mkdir -p build-release && cd build-release
 cmake -DCMAKE_BUILD_TYPE=Release ..
 ```
 5. Build
+## Linux/MacOS
 ```
 cmake --build .
+```
+## Windows
+```
+cmake --build . --config Release
 ```
 6. Run the app
 ```
 $./stats
 
 ```
+
+# Links
+* C++ numpy-like template-based array implementation: https://github.com/mgorshkov/np
+* ML Methods from scikit-learn library: https://github.com/mgorshkov/sklearn
