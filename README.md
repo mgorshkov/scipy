@@ -1,14 +1,13 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/bdews6m7dh2botlx/branch/main?svg=true)](https://ci.appveyor.com/project/mgorshkov/scipy/branch/main)
+
 # About
 Scientific methods on top of NP library.
 
-# Latest artifact
-https://mgorshkov.jfrog.io/artifactory/default-generic-local/scipy/scipy-0.0.1.tgz
-
 # Requirements
-Any C++17-compatible compiler:
-* gcc 8 or higher
+Any C++20-compatible compiler:
+* gcc 10 or higher
 * clang 6 or higher
-* Visual Studio 2017 or higher
+* Visual Studio 2019 or higher
 
 # Repo
 ```
@@ -96,4 +95,5 @@ $./stats
 
 # Links
 * C++ numpy-like template-based array implementation: https://github.com/mgorshkov/np
+* Methods from pandas library on top of NP library: https://github.com/mgorshkov/pd
 * ML Methods from scikit-learn library: https://github.com/mgorshkov/sklearn

@@ -26,6 +26,7 @@ SOFTWARE.
 #include <utility>
 
 #include <np/Array.hpp>
+#include <pd/core/frame/DataFrame/DataFrame.hpp>
 
 namespace scipy {
     namespace stats {
@@ -38,7 +39,7 @@ namespace scipy {
         template<typename DType = np::DTypeDefault>
         std::pair<Array<DType>, Array<np::Size>> mode(const Array<DType> &array) {
             auto sh = array.shape();
-            if (sh.size() == 0) {
+            if (sh.empty()) {
                 Array<DType> mode{};
                 Array<np::Size> count{};
                 return std::make_pair(mode, count);
@@ -75,14 +76,65 @@ namespace scipy {
                     ++freq[array.get(index * sh[1] + dim)];
                 }
                 std::priority_queue<Pair, std::vector<Pair>, decltype(cmp)> queue{cmp};
-                for (auto it = freq.cbegin(); it != freq.cend(); ++it) {
-                    queue.push(*it);
+                for (const auto &it: freq) {
+                    queue.emplace(it);
                 }
                 maxMode[dim] = queue.top().first;
                 maxCount[dim] = queue.top().second;
             }
             Array<DType> mode{maxMode, np::Shape{1, sh[1]}};
             Array<np::Size> count{maxCount, np::Shape{1, sh[1]}};
+            return std::make_pair(mode, count);
+        }
+
+        using DataFrame = pd::DataFrame;
+        std::pair<DataFrame, DataFrame> mode(const DataFrame &dataFrame) {
+            auto sh = dataFrame.shape();
+            if (sh.empty()) {
+                DataFrame mode{};
+                DataFrame count{};
+                return std::make_pair(mode, count);
+            }
+            if (sh.size() != 1 && sh.size() != 2)
+                throw std::runtime_error("Only 1D and 2D arrays supported");
+
+            using Pair = std::pair<pd::internal::Value, np::Size>;
+            auto cmp = [](const Pair &pair1, const Pair &pair2) {
+                return pair1.second < pair2.second || (pair1.second == pair2.second && pair1.first > pair2.first);
+            };
+            if (sh.size() == 1) {
+                std::unordered_map<pd::internal::Value, np::Size> freq;
+                for (np::Size row = 0; row < dataFrame.shape()[0]; ++row) {
+                    ++freq[dataFrame.at(row, 0)];
+                }
+                std::priority_queue<Pair, std::vector<Pair>, decltype(cmp)> queue{cmp};
+                for (const auto &it: freq) {
+                    queue.emplace(it);
+                }
+                pd::internal::Value maxMode{queue.top().first};
+                np::Size maxCount{queue.top().second};
+                DataFrame mode{np::Array<pd::internal::Value>{std::vector<pd::internal::Value>{maxMode}}};
+                DataFrame count{np::Array<np::Size>{std::vector<np::Size>{maxCount}}};
+                return std::make_pair(mode, count);
+            }
+            std::vector<pd::internal::Value> maxMode;
+            maxMode.resize(sh[1]);
+            std::vector<np::Size> maxCount;
+            maxCount.resize(sh[1]);
+            for (np::Size dim = 0; dim < sh[1]; ++dim) {
+                std::unordered_map<pd::internal::Value, np::Size> freq;
+                for (std::size_t index = 0; index < sh[0]; ++index) {
+                    ++freq[dataFrame.at(index, dim)];
+                }
+                std::priority_queue<Pair, std::vector<Pair>, decltype(cmp)> queue{cmp};
+                for (const auto &it: freq) {
+                    queue.emplace(it);
+                }
+                maxMode[dim] = queue.top().first;
+                maxCount[dim] = queue.top().second;
+            }
+            DataFrame mode{Array<pd::internal::Value>{maxMode, np::Shape{1, sh[1]}}};
+            DataFrame count{Array<np::Size>{maxCount, np::Shape{1, sh[1]}}};
             return std::make_pair(mode, count);
         }
     }// namespace stats

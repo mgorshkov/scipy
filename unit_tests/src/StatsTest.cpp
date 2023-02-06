@@ -35,25 +35,32 @@ class StatsTest : public ScipyTest {
 protected:
 };
 
-TEST_F(StatsTest, mode1DArrayTest) {
-    {
-        np::Array<np::int_> array{1, 2, 3, 3};
-        auto result = mode<np::int_>(array);
-        compare(result.first, np::Array<np::int_>{3});
-        compare(result.second, np::Array<np::Size>{2});
-    }
-    {
-        np::Array<np::int_> array{1, 2, 3};
-        auto result = mode<np::int_>(array);
-        compare(result.first, np::Array<np::int_>{1});
-        compare(result.second, np::Array<np::Size>{1});
-    }
-    {
-        np::Array<np::int_> array{3, 2, 1};
-        auto result = mode<np::int_>(array);
-        compare(result.first, np::Array<np::int_>{1});
-        compare(result.second, np::Array<np::Size>{1});
-    }
+TEST_F(StatsTest, mode1DArrayTest1) {
+    np::Array<np::int_> array{1, 2, 3, 3};
+    auto result = mode<np::int_>(array);
+    compare(result.first, np::Array<np::int_>{3});
+    compare(result.second, np::Array<np::Size>{2});
+}
+
+TEST_F(StatsTest, mode1DArrayTest2) {
+    np::Array<np::int_> array{1, 2, 3};
+    auto result = mode<np::int_>(array);
+    compare(result.first, np::Array<np::int_>{1});
+    compare(result.second, np::Array<np::Size>{1});
+}
+
+TEST_F(StatsTest, mode1DArrayTest3) {
+    np::Array<np::int_> array{3, 2, 1};
+    auto result = mode<np::int_>(array);
+    compare(result.first, np::Array<np::int_>{1});
+    compare(result.second, np::Array<np::Size>{1});
+}
+
+TEST_F(StatsTest, mode1DArrayTest4) {
+    np::Array<np::int_> array{1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2, 2, 1};
+    auto result = mode<np::int_>(array);
+    compare(result.first, np::Array<np::int_>{1});
+    compare(result.second, np::Array<np::Size>{9});
 }
 
 TEST_F(StatsTest, mode2DArrayTest) {
@@ -71,4 +78,59 @@ TEST_F(StatsTest, mode2DArrayTest) {
     auto result = mode<np::int_>(array);
     compare(result.first, arrayMode);
     compare(result.second, arrayCount);
+}
+
+TEST_F(StatsTest, mode1DDataFrameTest1) {
+    np::Array<np::int_> array{1, 2, 3, 3};
+    DataFrame df{array};
+    auto result = mode(df);
+    compare(result.first, DataFrame{np::Array<np::int_>{3}});
+    compare(result.second, DataFrame{np::Array<np::Size>{2}});
+}
+
+TEST_F(StatsTest, mode1DDataFrameTest2) {
+    np::Array<np::int_> array{1, 2, 3};
+    DataFrame df{array};
+    auto result = mode(df);
+    compare(result.first, DataFrame{np::Array<np::int_>{1}});
+    compare(result.second, DataFrame{np::Array<np::Size>{1}});
+}
+
+TEST_F(StatsTest, mode1DDataFrameTest3) {
+    np::Array<np::int_> array{3, 2, 1};
+    DataFrame df{array};
+    auto result = mode(df);
+    compare(result.first, DataFrame{np::Array<np::int_>{1}});
+    compare(result.second, DataFrame{np::Array<np::Size>{1}});
+}
+
+TEST_F(StatsTest, mode1DDataFrameTest4) {
+    np::Array<np::int_> array{1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2, 2, 1};
+    DataFrame df{array};
+    auto result = mode(df);
+    compare(result.first, DataFrame{np::Array<np::int_>{1}});
+    compare(result.second, DataFrame{np::Array<np::Size>{9}});
+}
+
+TEST_F(StatsTest, mode2DDataFrameTest) {
+    np::int_ c_array[5][4] = {
+            {6, 8, 3, 0},
+            {3, 2, 1, 7},
+            {8, 1, 8, 4},
+            {5, 3, 0, 5},
+            {4, 7, 5, 9}};
+    Array<np::int_> array{c_array};
+    DataFrame df{array};
+
+    np::int_ c_array_mode[1][4] = {{3, 1, 0, 0}};
+    Array<np::int_> arrayMode{c_array_mode};
+    DataFrame dfMode{arrayMode};
+
+    np::Size c_array_count[1][4] = {{1, 1, 1, 1}};
+    Array<np::Size> arrayCount{c_array_count};
+    DataFrame dfCount{arrayCount};
+
+    auto result = mode(df);
+    compare(result.first, dfMode);
+    compare(result.second, dfCount);
 }
