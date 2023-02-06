@@ -25,16 +25,35 @@ SOFTWARE.
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include <np/Array.hpp>
+#include <pd/core/frame/DataFrame/DataFrame.hpp>
+#include <pd/core/frame/DataFrame/DataFrameStreamIo.hpp>
+
 class ScipyTest : public ::testing::Test {
 protected:
     template<typename DType1, typename Derived1, typename Storage1, typename DType2, typename Derived2, typename Storage2>
     static void compare(const np::ndarray::internal::NDArrayBase<DType1, Derived1, Storage1> &result, const np::ndarray::internal::NDArrayBase<DType2, Derived2, Storage2> &result_sample, bool shouldEqual = true) {
         bool equals = np::array_equal(result, result_sample);
         if (shouldEqual && !equals) {
-            std::cerr << "Array " << result << " is not equal to " << result_sample << std::endl;
+            std::cerr << "Array " << result << std::endl
+                      << " is not equal to " << result_sample << std::endl;
             EXPECT_TRUE(equals);
         } else if (!shouldEqual && equals) {
-            std::cerr << "Array " << result << " is equal to " << result_sample << std::endl;
+            std::cerr << "Array " << result << std::endl
+                      << " is equal to " << result_sample << std::endl;
+            EXPECT_FALSE(equals);
+        }
+    }
+
+    static void compare(const pd::DataFrame &result, const pd::DataFrame &result_sample, bool shouldEqual = true) {
+        bool equals = result == result_sample;
+        if (shouldEqual && !equals) {
+            std::cerr << "DataFrame " << result << std::endl
+                      << " is not equal to " << result_sample << std::endl;
+            EXPECT_TRUE(equals);
+        } else if (!shouldEqual && equals) {
+            std::cerr << "DataFrame " << result << std::endl
+                      << " is equal to " << result_sample << std::endl;
             EXPECT_FALSE(equals);
         }
     }
