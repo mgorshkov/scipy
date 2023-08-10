@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13.0)
 
 set(SCIPY_UNIT_TESTS scipy_unit_tests)
 
-project(${SCIPY_UNIT_TESTS} VERSION 0.0.2 DESCRIPTION "SciPy Unit Tests")
+project(${SCIPY_UNIT_TESTS} VERSION 0.0.3 DESCRIPTION "SciPy Unit Tests")
 
 include(FetchContent)
 

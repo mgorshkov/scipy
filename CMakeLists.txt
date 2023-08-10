@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13.0)
 
 set(SCIPY scipy)
 
-project(${SCIPY} VERSION 0.0.2 DESCRIPTION "SciPy Methods on top of NP library")
+project(${SCIPY} VERSION 0.0.3 DESCRIPTION "SciPy Methods on top of NP library")
 
 set(CMAKE_CXX_STANDARD 20)
 

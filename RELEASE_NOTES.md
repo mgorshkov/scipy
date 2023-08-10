@@ -1,3 +1,7 @@
+# Release 0.0.3
+## Changes
+* betainc() function
+
 # Release 0.0.2
 ## Changes
 * DataFrames supported in mode()
