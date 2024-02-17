@@ -35,8 +35,21 @@ protected:
 };
 
 TEST_F(SpecialTest, betaincTest) {
-    EXPECT_DOUBLE_EQ(1.0, betainc(0.2, 3.5, 1.0));
-
-    np::float_ a = 1.4, b = 3.1, x = 0.5;
-    EXPECT_DOUBLE_EQ(0.8148904036225296, betainc(a, b, x));
+    {
+        EXPECT_FLOAT_EQ(1.0, betainc(0.2, 3.5, 1.0));
+    }
+    {
+        np::float_ a = 1.4, b = 3.1, x = 0.5;
+        EXPECT_FLOAT_EQ(0.8148904036225296, betainc(a, b, x));
+    }
+    {
+        np::float_ a = 0.5 * 99997;
+        np::float_ b = 0.5 * 99997;
+        np::float_ x = 0.49999;
+        EXPECT_FLOAT_EQ(0.49747692843747587, betainc(a, b, x));
+        x = 0.55;
+        EXPECT_FLOAT_EQ(1.0, betainc(a, b, x));
+        x = 0.56;
+        EXPECT_FLOAT_EQ(1.0, betainc(a, b, x));
+    }
 }

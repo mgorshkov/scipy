@@ -123,7 +123,7 @@ namespace scipy {
             maxCount.resize(sh[1]);
             for (np::Size dim = 0; dim < sh[1]; ++dim) {
                 std::unordered_map<pd::internal::Value, np::Size> freq;
-                for (std::size_t index = 0; index < sh[0]; ++index) {
+                for (np::Size index = 0; index < sh[0]; ++index) {
                     ++freq[dataFrame.at(index, dim)];
                 }
                 std::priority_queue<Pair, std::vector<Pair>, decltype(cmp)> queue{cmp};
