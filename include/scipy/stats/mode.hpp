@@ -1,7 +1,7 @@
 /*
 Scientific methods on top of NP library
 
-Copyright (c) 2023 Mikhail Gorshkov (mikhail.gorshkov@gmail.com)
+Copyright (c) 2022-2026 Mikhail Gorshkov (mikhail.gorshkov@gmail.com)
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -123,7 +123,7 @@ namespace scipy {
             maxCount.resize(sh[1]);
             for (np::Size dim = 0; dim < sh[1]; ++dim) {
                 std::unordered_map<pd::internal::Value, np::Size> freq;
-                for (std::size_t index = 0; index < sh[0]; ++index) {
+                for (np::Size index = 0; index < sh[0]; ++index) {
                     ++freq[dataFrame.at(index, dim)];
                 }
                 std::priority_queue<Pair, std::vector<Pair>, decltype(cmp)> queue{cmp};

@@ -24,32 +24,47 @@ SOFTWARE.
 
 #include <gtest/gtest.h>
 
-#include <scipy/special/betainc.hpp>
+#include <scipy/linalg/lstsq.hpp>
 
 #include <ScipyTest.hpp>
 
-using namespace scipy::special;
+using namespace scipy::linalg;
 
-class SpecialTest : public ScipyTest {
+class LinalgTest : public ScipyTest {
 protected:
 };
 
-TEST_F(SpecialTest, betaincTest) {
-    {
-        EXPECT_FLOAT_EQ(1.0, betainc(0.2, 3.5, 1.0));
+TEST_F(LinalgTest, lstsqTest) {
+    using namespace np;
+    using namespace scipy::linalg;
+
+    const size_t rows = 10000;
+    const size_t cols = 1000;
+    const double error_expected = 19.0;
+
+    // Generate random matrix A and true solution x_true
+    Shape shapeA({rows, cols});
+    auto A = random::rand(shapeA);
+
+    Shape shapeX({cols});
+    auto x_true = random::rand(shapeX);
+
+    // Add noise
+    auto noise = random::rand(Shape{rows}, -0.01, 0.01);// 1 % noise
+    // Compute b = A * x_true + noise
+    auto b = A.dot(x_true) + noise;
+
+    // Solve using MRRR method
+    auto start = std::chrono::high_resolution_clock::now();
+    auto x = lstsq(A, b);
+    auto end = std::chrono::high_resolution_clock::now();
+
+    double error = 0.0;
+    for (size_t i = 0; i < cols; i++) {
+        error += (x.get(i) - x_true.get(i)) * (x.get(i) - x_true.get(i));
     }
-    {
-        np::float_ a = 1.4, b = 3.1, x = 0.5;
-        EXPECT_FLOAT_EQ(0.8148904036225296, betainc(a, b, x));
-    }
-    {
-        np::float_ a = 0.5 * 99997;
-        np::float_ b = 0.5 * 99997;
-        np::float_ x = 0.49999;
-        EXPECT_FLOAT_EQ(0.49747692843747587, betainc(a, b, x));
-        x = 0.55;
-        EXPECT_FLOAT_EQ(1.0, betainc(a, b, x));
-        x = 0.56;
-        EXPECT_FLOAT_EQ(1.0, betainc(a, b, x));
-    }
+
+    auto time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "Time:  " << time.count() << " ms\n";
+    EXPECT_LT(std::sqrt(error), error_expected);
 }
