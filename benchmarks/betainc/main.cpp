@@ -21,17 +21,50 @@ SOFTWARE.
 
 #include <iostream>
 
-#include <np/Array.hpp>
-#include <scipy/stats/mode.hpp>
+#include <scipy/special/betainc.hpp>
+#include <functional>
+#include <time.h>
+
+#ifdef BOOST
+#include <boost/math/special_functions/beta.hpp>
+#endif
+typedef double (*IncompleteBetafunc)(double, double, double);
+
+void measureIncompleteBetaFunction(IncompleteBetafunc func) {
+    timespec start;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+
+    np::float_ a = 0.5 * 99997;
+    np::float_ b = 0.5 * 99997;
+
+    np::float_ x = 0.4;
+    int count = 0;
+    np::float_ res = 0;
+
+    while (x < 0.6) {
+        ++count;
+        res += func(a, b, x);
+        x += 0.000001;
+    }
+
+    timespec stop;
+    clock_gettime(CLOCK_MONOTONIC, &stop);
+
+    std::uint64_t diff = 1000000000L * (stop.tv_sec - start.tv_sec) + stop.tv_nsec - start.tv_nsec;
+
+    std::cout << "Result = " << res << std::endl;
+    std::cout << "Time = " << diff << " ns" << std::endl;
+    std::cout << "Loops = " << count << std::endl;
+}
+
 
 int main(int, char **) {
-    using namespace np;
-    using namespace scipy;
+#ifdef BOOST
+    std::cout << "Boost incomplete beta function" << std::endl;
+    measureIncompleteBetaFunction(boost::math::ibeta);
+#endif
+    std::cout << "Scipy incomplete beta function" << std::endl;
+    measureIncompleteBetaFunction(scipy::special::betainc);
 
-    // Mode calculation
-    Size size = 10000000;
-    auto r = random::rand(size);
-    auto m = stats::mode(r);
-    std::cout << "mode=" << m.first << " " << m.second;
     return 0;
 }

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13.0)
 
 set(SCIPY_UNIT_TESTS scipy_unit_tests)
 
-project(${SCIPY_UNIT_TESTS} VERSION 0.0.3 DESCRIPTION "SciPy Unit Tests")
+project(${SCIPY_UNIT_TESTS} VERSION 0.0.4 DESCRIPTION "SciPy Unit Tests")
 
 include(FetchContent)
 
@@ -27,11 +27,15 @@ target_sources(${SCIPY_UNIT_TESTS} PUBLIC ${SOURCES})
 
 add_test(NAME ${SCIPY_UNIT_TESTS} COMMAND tests)
 
-target_link_libraries(
-    ${SCIPY_UNIT_TESTS}
+set (LIBS
+    np
     pd
     gtest
     ${PTHREAD})
+
+target_link_libraries(
+    ${SCIPY_UNIT_TESTS}
+    ${LIBS})
 
 install(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/${SCIPY_UNIT_TESTS}
