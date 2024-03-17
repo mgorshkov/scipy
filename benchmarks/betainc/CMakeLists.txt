@@ -1,18 +1,10 @@
 cmake_minimum_required(VERSION 3.13.0)
 
-set(SCIPY scipy)
+set(BETAINC betainc)
 
-project(${SCIPY} VERSION 0.0.4 DESCRIPTION "SciPy Methods on top of NP library")
+project(${BETAINC})
 
 set(CMAKE_CXX_STANDARD 20)
-
-if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
-
-if (NOT DEFINED CMAKE_INSTALL_BINDIR)
-    set(CMAKE_INSTALL_BINDIR "bin" CACHE PATH "user executables (bin)")
-endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(/W4)
@@ -20,6 +12,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 else()
     add_compile_options(-Wall -Wextra -pedantic)
 endif()
+
+option(BOOST "Enable comparison with Boost library" OFF)
 
 option(ENABLE_OPENMP "Enable OpenMP" OFF)
 if (ENABLE_OPENMP)
@@ -112,47 +106,40 @@ endif()
 include(FetchContent)
 
 FetchContent_Declare(
-    pd
-    GIT_REPOSITORY https://github.com/mgorshkov/pd.git
-    GIT_TAG main
+    scipy
+    GIT_REPOSITORY https://github.com/mgorshkov/scipy.git
+    GIT_TAG 0.0.4
 )
 
-FetchContent_MakeAvailable(pd)
+FetchContent_MakeAvailable(scipy)
 
-include_directories(include ${pd_SOURCE_DIR}/include)
+include_directories(../../include ${scipy_SOURCE_DIR}/include)
 
-add_library(${SCIPY} INTERFACE)
+if (${BOOST})
+    add_compile_definitions(BOOST)
 
-set(MAKE_DOC OFF)
+    FetchContent_Declare(
+        boost
+        GIT_REPOSITORY https://github.com/boostorg/math.git
+        GIT_SHALLOW TRUE
+    )
 
-# Make unit tests and sample if it's the main project
-if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    set(MAKE_UNIT_TESTS ON)
-    set(MAKE_SAMPLE ON)
-else()
-    set(MAKE_UNIT_TESTS OFF)
-    set(MAKE_SAMPLE OFF)
+    FetchContent_MakeAvailable(boost)
+
+    include_directories(${boost_SOURCE_DIR}/include)
 endif()
 
-if (MAKE_UNIT_TESTS)
-    message(STATUS "Enable testing in ${SCIPY}")
-    add_subdirectory(unit_tests)
-    include (CTest)
-    enable_testing()
-endif()
+add_executable(${BETAINC})
 
-if (MAKE_DOC)
-    message(STATUS "Enable doxygen in ${SCIPY}")
-    add_subdirectory(doc)
-endif()
+target_sources(${BETAINC} PUBLIC main.cpp)
 
-if (MAKE_SAMPLE)
-    message(STATUS "Enable samples build in ${SCIPY}")
-    add_subdirectory(samples/stats)
-endif()
+target_link_libraries(
+    ${BETAINC}
+    pd
+    ${PTHREAD})
 
 install(
-    DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/scipy
-    DESTINATION include
-    COMPONENT ${SCIPY_UNIT_TESTS}
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/${BETAINC}
+    DESTINATION "bin"
+    COMPONENT ${BETAINC}
 )

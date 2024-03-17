@@ -19,19 +19,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <iostream>
-
 #include <np/Array.hpp>
-#include <scipy/stats/mode.hpp>
 
-int main(int, char **) {
-    using namespace np;
-    using namespace scipy;
+#pragma once
 
-    // Mode calculation
-    Size size = 10000000;
-    auto r = random::rand(size);
-    auto m = stats::mode(r);
-    std::cout << "mode=" << m.first << " " << m.second;
-    return 0;
-}
+namespace scipy {
+    namespace linalg {
+        using Array = np::Array<np::float_>;
+
+        // Compute least-squares solution to equation Ax = b.
+        Array lstsq(const Array &a, const Array &b) {
+        }
+
+
+    }// namespace linalg
+}// namespace scipy
