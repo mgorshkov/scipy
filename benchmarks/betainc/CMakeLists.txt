@@ -1,119 +1,75 @@
 cmake_minimum_required(VERSION 3.13.0)
 
-set(BETAINC betainc)
+set(PROJECT_NAME betainc)
 
-project(${BETAINC})
+project(${PROJECT_NAME})
 
-set(CMAKE_CXX_STANDARD 20)
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    add_compile_options(/W4)
-    add_compile_definitions(NOMINMAX) # allow using min/max in the project
-else()
-    add_compile_options(-Wall -Wextra -pedantic)
-endif()
-
-option(BOOST "Enable comparison with Boost library" OFF)
-
-option(ENABLE_OPENMP "Enable OpenMP" OFF)
-if (ENABLE_OPENMP)
-    message("OpenMP ON")
-    find_package(OpenMP)
-    if (OPENMP_FOUND)
-        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-        set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-    endif()
-endif()
-
-option(ENABLE_SSE2 "Enable SSE2 optimizations" OFF)
-option(ENABLE_SSE3 "Enable SSE3 optimizations" OFF)
-option(ENABLE_AVX "Enable AVX optimizations" OFF)
-option(ENABLE_AVX2 "Enable AVX2 optimizations" OFF)
+# Tune up various optimizations
+# Enable CUDA support
+option(ENABLE_CUDA "Enable CUDA optimizations" ON)
+# Set up options for basic compile optimizations
+option(ENABLE_AVX2 "Enable AVX2 optimizations" ON)
 option(ENABLE_AVX512 "Enable AVX512 optimizations" OFF)
+option(ENABLE_AMX "Enable AMX (Advanced Matrix Extensions) optimizations" OFF)
+# Set up options for OpenMP support
+option(ENABLE_OPENMP "Enable OpenMP" ON)
 
-if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-    if (ENABLE_AVX512)
-        add_compile_definitions(ENABLE_AVX512)
-        if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-            message("GNU or Clang compiler, AVX512 optimization ON")
-            add_compile_options(-O3 -ftree-vectorize -mavx512f -mavx512dq -mavx512bw -mavx512vbmi -mavx512vbmi2 -mavx512vl)
-        elseif (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-            message("Intel compiler, AVX512 optimization ON")
-            add_compile_options(-O3 -mavx512f -mavx512dq -mavx512bw -mavx512vbmi -mavx512vbmi2 -mavx512vl)
-        elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-            message("MSVC compiler, AVX512 optimization ON")
-            add_compile_options(/O2 /arch:AVX512)
-        endif()
-    endif()
-    if (ENABLE_AVX2)
-        add_compile_definitions(ENABLE_AVX2)
-        if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-            message("GNU or Clang compiler, AVX2 optimization ON")
-            add_compile_options(-O3 -ftree-vectorize -mavx2)
-        elseif (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-            message("Intel compiler, AVX2 optimization ON")
-            add_compile_options(-O3 -msse4.2 -axAVX,core-avx2)
-            add_compile_options(-axAVX -xAVX)
-        elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-            message("MSVC compiler, AVX2 optimization ON")
-            add_compile_options(/O2 /arch:AVX2)
-        endif()
-    endif()
-    if (ENABLE_AVX)
-        add_compile_definitions(ENABLE_AVX)
-        if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-            message("GNU or Clang compiler, AVX optimization ON")
-            add_compile_options(-O3 -ftree-vectorize -mavx)
-        elseif (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-            message("Intel compiler, AVX optimization ON")
-            add_compile_options(-Ofast -axAVX -xAVX)
-        elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-            message("MSVC compiler, AVX optimization ON")
-            add_compile_options(/O2 /arch:AVX)
-        endif()
-    endif()
-    if (ENABLE_SSE3)
-        add_compile_definitions(ENABLE_SSE3)
-        if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-            message("GNU or Clang compiler, SSE3 optimization ON")
-            add_compile_options(-O3 -ftree-vectorize -msse3)
-        elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-            message("Intel compiler, SSE3 optimization ON")
-            add_compile_options(-Ofast -axSSE3 -xSSE3)
-        elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-            message("MSVC compiler, SSE3 optimization ON")
-            add_compile_options(/O2 /arch:SSE2) # VC doesn't support /arch:SSE3
-        endif()
-    endif()
-    if (ENABLE_SSE2)
-        add_compile_definitions(ENABLE_SSE2)
-        if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-            message("GNU or Clang compiler, SSE2 optimization ON")
-            add_compile_options(-O3 -ftree-vectorize -msse2)
-        elseif (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-            message("Intel compiler, SSE2 optimization ON")
-            add_compile_options(-Ofast -axSSE2 -xSSE2)
-        elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-            message("MSVC compiler, SSE2 optimization ON")
-            if (NOT CMAKE_CL_64)
-                add_compile_options(/O2 /arch:SSE2)
-            endif()
-        endif()
-    endif()
-endif()
+option(BOOST "Enable comparison with Boost library" ON)
 
 include(FetchContent)
+
+FetchContent_Declare(
+    cmake
+    GIT_REPOSITORY https://github.com/mgorshkov/cmake.git
+    GIT_TAG main
+)
+FetchContent_MakeAvailable(cmake)
+
+# Apply global cmake options
+include(${cmake_SOURCE_DIR}/Config.cmake)
+
+FetchContent_Declare(
+    np
+    GIT_REPOSITORY https://github.com/mgorshkov/np.git
+    GIT_TAG main
+    CMAKE_ARGS
+    -DENABLE_CUDA=${ENABLE_CUDA}
+    -DENABLE_OPENMP=${ENABLE_OPENMP}
+    -DENABLE_SSE2=${ENABLE_SSE2}
+    -DENABLE_SSE3=${ENABLE_SSE3}
+    -DENABLE_AVX=${ENABLE_AVX}
+    -DENABLE_AVX2=${ENABLE_AVX2}
+    -DENABLE_AVX512=${ENABLE_AVX512}
+    -DENABLE_AMX=${ENABLE_AMX}
+    -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+)
+
+FetchContent_MakeAvailable(np)
 
 FetchContent_Declare(
     scipy
     GIT_REPOSITORY https://github.com/mgorshkov/scipy.git
     GIT_TAG main
+    CMAKE_ARGS
+    -DENABLE_CUDA=${ENABLE_CUDA}
+    -DENABLE_OPENMP=${ENABLE_OPENMP}
+    -DENABLE_SSE2=${ENABLE_SSE2}
+    -DENABLE_SSE3=${ENABLE_SSE3}
+    -DENABLE_AVX=${ENABLE_AVX}
+    -DENABLE_AVX2=${ENABLE_AVX2}
+    -DENABLE_AVX512=${ENABLE_AVX512}
+    -DENABLE_AMX=${ENABLE_AMX}
+    -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+    -DDEBUG_INFO=${DEBUG_INFO}
 )
 
 FetchContent_MakeAvailable(scipy)
 
-include_directories(../../include ${scipy_SOURCE_DIR}/include)
+add_executable(${PROJECT_NAME} main.cpp)
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${np_SOURCE_DIR}/include
+    ${scipy_SOURCE_DIR}/include)
 
 if (${BOOST})
     add_compile_definitions(BOOST)
@@ -126,20 +82,33 @@ if (${BOOST})
 
     FetchContent_MakeAvailable(boost)
 
-    include_directories(${boost_SOURCE_DIR}/include)
+    target_include_directories(${PROJECT_NAME} PRIVATE
+        ${boost_SOURCE_DIR}/include)
 endif()
 
-add_executable(${BETAINC})
+# Comparison benchmark: C++ scipy (AVX2) vs Python scipy
+set(COMPARISON_PROJECT_NAME ${PROJECT_NAME}_comparison)
 
-target_sources(${BETAINC} PUBLIC main.cpp)
+add_executable(${COMPARISON_PROJECT_NAME} comparison_main.cpp)
 
-target_link_libraries(
-    ${BETAINC}
-    pd
-    ${PTHREAD})
+target_include_directories(${COMPARISON_PROJECT_NAME} PRIVATE
+    ${np_SOURCE_DIR}/include
+    ${scipy_SOURCE_DIR}/include)
+
+target_compile_definitions(${COMPARISON_PROJECT_NAME} PRIVATE
+    PYTHON_BENCHMARK_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
+# Apply target-dependent cmake options
+include(${cmake_SOURCE_DIR}/Target.cmake)
 
 install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/${BETAINC}
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
     DESTINATION "bin"
-    COMPONENT ${BETAINC}
+    COMPONENT ${PROJECT_NAME}
+)
+
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/${COMPARISON_PROJECT_NAME}
+    DESTINATION "bin"
+    COMPONENT ${PROJECT_NAME}
 )

@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.13.0)
 
-set(SCIPY_UNIT_TESTS scipy_unit_tests)
+set(PROJECT_NAME scipy_unit_tests)
 
-project(${SCIPY_UNIT_TESTS} VERSION 0.0.4 DESCRIPTION "SciPy Unit Tests")
+project(${PROJECT_NAME} VERSION 0.0.5 DESCRIPTION "SciPy Unit Tests")
 
 include(FetchContent)
 
@@ -18,27 +18,35 @@ set(BUILD_GTEST ON CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(googletest)
 
-include_directories(../include include ${googletest_SOURCE_DIR}/googletest/include)
+add_executable(${PROJECT_NAME})
 
-add_executable(${SCIPY_UNIT_TESTS})
+target_include_directories(${PROJECT_NAME}
+    PRIVATE
+        ../include
+        include
+)
+
+target_include_directories(${PROJECT_NAME}
+    SYSTEM PRIVATE
+        ${googletest_SOURCE_DIR}/googletest/include
+)
 
 file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR} "src/*.cpp")
-target_sources(${SCIPY_UNIT_TESTS} PUBLIC ${SOURCES})
+target_sources(${PROJECT_NAME} PUBLIC ${SOURCES})
 
-add_test(NAME ${SCIPY_UNIT_TESTS} COMMAND tests)
+add_test(NAME ${PROJECT_NAME} COMMAND tests)
 
 set (LIBS
     np
     pd
     gtest
-    ${PTHREAD})
+    pthread)
 
-target_link_libraries(
-    ${SCIPY_UNIT_TESTS}
-    ${LIBS})
+# Apply target-dependent cmake options
+include(${cmake_SOURCE_DIR}/Target.cmake)
 
 install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/${SCIPY_UNIT_TESTS}
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
     DESTINATION ${CMAKE_INSTALL_BINDIR}
-    COMPONENT ${SCIPY_UNIT_TESTS}
+    COMPONENT ${PROJECT_NAME}
 )

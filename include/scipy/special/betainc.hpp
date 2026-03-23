@@ -1,5 +1,5 @@
 /*
-Scientific methods on top of NP library
+⚡ SciPy methods in C++ | SIMD (AVX2/AVX512/AMX) CPU
 
 Copyright (c) 2022-2026 Mikhail Gorshkov (mikhail.gorshkov@gmail.com)
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,10 +22,9 @@ SOFTWARE.
 #pragma once
 
 #include <cmath>
-
-#if defined(__i386__) || defined(__x86_64__)
-#include <immintrin.h>
-#endif
+#include <limits>
+#include <scipy/Exception.hpp>
+#include <scipy/internal/intrinsics.hpp>
 
 #include <np/Array.hpp>
 
@@ -61,7 +60,7 @@ namespace scipy {
                                                                     -0.210264441724104883e-3, 0.217439618115212643e-3, -0.164318106536763890e-3,
                                                                     0.844182239838527433e-4, -0.261908384015814087e-4, 0.368991826595316234e-5, 0.0, 0.0};
             if (a <= 0.0 || b <= 0.0) {
-                throw std::runtime_error("a and b must be > 0");
+                SCIPY_THROW("a and b must be > 0");
             }
             np::float_ res = 0.0;
             constexpr np::float_ const1 = 5.24218750000000000;// 671/128
@@ -506,7 +505,7 @@ namespace scipy {
             const np::float_ one = 1.0;
 
             if (x < zero || x > one) {
-                throw std::runtime_error("x must be within 0..1");
+                SCIPY_THROW("x must be within 0..1");
             }
 
             if (x == zero || x == one) {
@@ -514,11 +513,15 @@ namespace scipy {
             }
 
             if (a < zero) {
-                throw std::runtime_error("a must be >=0");
+                SCIPY_THROW("a must be >=0");
             }
 
             if (b < zero) {
-                throw std::runtime_error("b must be >=0");
+                SCIPY_THROW("b must be >=0");
+            }
+
+            if (a == zero && b == zero) {
+                return std::numeric_limits<np::float_>::quiet_NaN();
             }
 
             if (a == zero) {
@@ -555,7 +558,7 @@ namespace scipy {
         using Array = np::Array<np::float_>;
         Array betainc(const Array &a, const Array &b, const Array &x) {
             if (a.shape() != b.shape() || b.shape() != x.shape()) {
-                throw std::runtime_error("Shapes must be the same");
+                SCIPY_THROW("Shapes must be the same");
             }
             Array result{a.shape()};
             for (np::Size i = 0; i < a.size(); ++i) {
