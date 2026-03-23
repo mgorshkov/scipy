@@ -1,5 +1,5 @@
 /*
-Scientific methods on top of NP library
+⚡ SciPy methods in C++ | SIMD (AVX2/AVX512/AMX) CPU
 
 Copyright (c) 2022-2026 Mikhail Gorshkov (mikhail.gorshkov@gmail.com)
 Permission is hereby granted, free of charge, to any person obtaining a copy

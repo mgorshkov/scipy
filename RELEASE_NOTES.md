@@ -1,3 +1,7 @@
+# Release 0.0.5
+## Changes
+* CUDA and SIMD optimizations
+
 # Release 0.0.4
 ## Changes
 * lstsq() function, benchmarks

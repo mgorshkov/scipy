@@ -1,5 +1,5 @@
 /*
-Scientific methods on top of NP library
+⚡ SciPy methods in C++ | SIMD (AVX2/AVX512/AMX) CPU
 
 Copyright (c) 2022-2026 Mikhail Gorshkov (mikhail.gorshkov@gmail.com)
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -27,6 +27,7 @@ SOFTWARE.
 
 #include <np/Array.hpp>
 #include <pd/core/frame/DataFrame/DataFrame.hpp>
+#include <scipy/Exception.hpp>
 
 namespace scipy {
     namespace stats {
@@ -45,7 +46,7 @@ namespace scipy {
                 return std::make_pair(mode, count);
             }
             if (sh.size() != 1 && sh.size() != 2)
-                throw std::runtime_error("Only 1D and 2D arrays supported");
+                SCIPY_THROW("Only 1D and 2D arrays supported");
 
             using Pair = std::pair<DType, np::Size>;
             auto cmp = [](const Pair &pair1, const Pair &pair2) {
@@ -96,7 +97,7 @@ namespace scipy {
                 return std::make_pair(mode, count);
             }
             if (sh.size() != 1 && sh.size() != 2)
-                throw std::runtime_error("Only 1D and 2D arrays supported");
+                SCIPY_THROW("Only 1D and 2D arrays supported");
 
             using Pair = std::pair<pd::internal::Value, np::Size>;
             auto cmp = [](const Pair &pair1, const Pair &pair2) {
